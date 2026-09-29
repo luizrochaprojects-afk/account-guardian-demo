@@ -41,7 +41,9 @@ Three properties carry the design:
 
 The full schema for the tables this edition keeps, with its policies, functions, views and
 triggers, is in [`supabase/schema.sql`](../supabase/schema.sql). It targets Postgres 15+
-(Supabase), and its header explains how to load it into a plain local database.
+(Supabase), and its header explains how to load it into a plain local database. CI applies
+it twice to a fresh Postgres 16 on every push and runs a smoke test of the stage gate
+(`supabase/tests/smoke.sql`).
 
 ## This demo
 

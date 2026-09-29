@@ -97,7 +97,8 @@ npm run dev        # http://localhost:8080
 
 Other scripts: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`.
 
-To load the documented schema into a local Postgres 15+ database instead:
+To load the documented schema into a local Postgres 15+ database instead (CI checks that it
+applies cleanly, twice, on every push):
 
 ```bash
 psql -d <database> -v ON_ERROR_STOP=1 -f supabase/schema.sql
