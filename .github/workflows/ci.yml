@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      # The denylist of real names lives in a repository secret, never in the
+      # repo. Hits are reported by term number only, so the log stays clean.
+      # Forks have no access to the secret and run the generic patterns alone.
+      - name: Sanitization gate
+        env:
+          SANITIZE_DENYLIST: ${{ secrets.SANITIZE_DENYLIST }}
+        run: |
+          if [ -n "$SANITIZE_DENYLIST" ]; then
+            node scripts/check-sanitize.mjs --dist
+          else
+            node scripts/check-sanitize.mjs --dist --generic-only
+          fi
+
+  # The documented schema is applied to a throwaway Postgres on every push:
+  # twice (it must be re-runnable), then a smoke test of the stage gate, the
+  # stage-history trigger, the dashboard functions and the views.
+  schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply schema (first run)
+        run: psql -v ON_ERROR_STOP=1 -q -f supabase/schema.sql
+
+      - name: Apply schema again (re-runnable)
+        run: psql -v ON_ERROR_STOP=1 -q -f supabase/schema.sql
+
+      - name: Smoke test
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/smoke.sql
