@@ -134,11 +134,18 @@ export function DemoTour() {
     setRect(null);
     let raf = 0;
     let tries = 0;
+    // The anchor usually renders as a skeleton first and grows when its data
+    // arrives, so its size is observed rather than measured once.
+    let observer: ResizeObserver | null = null;
     const find = () => {
       const el = document.querySelector<HTMLElement>(`[data-tour="${stop.anchor}"]`);
       if (el) {
         el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         setRect(el.getBoundingClientRect());
+        if (typeof ResizeObserver !== 'undefined') {
+          observer = new ResizeObserver(() => setRect(el.getBoundingClientRect()));
+          observer.observe(el);
+        }
         return;
       }
       if (tries++ < 120) raf = requestAnimationFrame(find);
@@ -152,6 +159,7 @@ export function DemoTour() {
     window.addEventListener('scroll', onChange, true);
     return () => {
       cancelAnimationFrame(raf);
+      observer?.disconnect();
       window.removeEventListener('resize', onChange);
       window.removeEventListener('scroll', onChange, true);
     };
