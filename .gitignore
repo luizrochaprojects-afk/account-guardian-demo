@@ -1,0 +1,29 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?
+
+# Local tooling state
+.claude/
+.superpowers/
+.playwright-mcp/
+.vercel
+
+# Env files: the demo needs none, so any env file here is a mistake
+.env
+.env.*
+
+# Sanitization denylist: real names never live in this repo
+.sanitize-denylist*
