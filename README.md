@@ -113,5 +113,5 @@ security, SQL functions and triggers, edge functions).
 
 Every company, person, meeting, email address and number in this repository is invented.
 Email domains use the reserved `.example` top-level domain. A sanitization check
-(`scripts/check-sanitize.mjs`) scans the source, the production build and the git history for
+(`scripts/check-sanitize.mjs`) scans the source and the production build for
 anything that should not be here before anything is published.
